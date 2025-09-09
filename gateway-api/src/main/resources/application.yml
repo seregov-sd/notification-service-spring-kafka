@@ -18,12 +18,20 @@ spring:
               predicates:
                 - Path=/api/users/**
               filters:
+                - name: CircuitBreaker
+                  args:
+                    name: userServiceCircuitBreaker
+                    fallbackUri: forward:/fallback/user
                 - RewritePath=/api/users/(?<segment>.*), /$\{segment}
             - id: notification-service-route
               uri: lb://notification-service
               predicates:
                 - Path=/api/email/**
               filters:
+                - name: CircuitBreaker
+                  args:
+                    name: notificationServiceCircuitBreaker
+                    fallbackUri: forward:/fallback/notification
                 - RewritePath=/api/email/(?<segment>.*), /$\{segment}
   main:
     web-application-type: reactive
@@ -35,14 +43,29 @@ eureka:
   instance:
     prefer-ip-address: true
 
+resilience4j:
+  circuitbreaker:
+    instances:
+      userServiceCircuitBreaker:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 3
+      notificationServiceCircuitBreaker:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,gateway,routes
+        include: health,info,gateway,routes,circuitbreakers
   endpoint:
     health:
       show-details: always
+    circuitbreakers:
+      enabled: true
 
 logging:
   level:
