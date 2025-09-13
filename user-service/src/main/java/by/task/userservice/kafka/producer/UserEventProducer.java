@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class UserEventProducer {
 
-    @Value("${spring.kafka.topic.user-events}")
+    @Value("${spring.kafka.topic.user-events:user-events}")
     private String topic;
 
     private final KafkaTemplate<String, Object> kafkaTemplate;

@@ -18,7 +18,10 @@ public class UserEventConsumer {
         this.emailService = emailService;
     }
 
-    @KafkaListener(topics = "${spring.kafka.topic.user-events}", groupId = "${spring.kafka.consumer.group-id}")
+    @KafkaListener(
+            topics = "${spring.kafka.topic.user-events:user-events}",
+            groupId = "${spring.kafka.consumer.group-id:notification-group}"
+    )
     public void consumeUserEvent(UserEvent event) {
         logger.info("Received UserEvent: {}", event);
 
